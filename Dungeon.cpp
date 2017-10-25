@@ -1,27 +1,8 @@
 #include <iostream>
 #include <time.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "Dungeon.h"
-
-class Dungeon {
-public:
-   Dungeon(void);
-   char dungeon[DUNGEON_ROWS][DUNGEON_COLUMNS];
-   char rooms[NUM_ROOMS][ROOM_CHARS];
-   int hardness[DUNGEON_ROWS][DUNGEON_COLUMNS];
-   int pc_x_position;
-   int pc_y_position;
-
-private:
-   void init_dungeon(void);
-   void add_rooms(void);
-   void add_corridors(void);
-   void init_hardness(void);
-   void place_pc(void);
-   void place_stairs(void);
-   int check_rooms(int rows, int columns, int start_row, int start_column);
-   void sort_rooms(void);
-};
 
 Dungeon::Dungeon()
 {
@@ -31,23 +12,32 @@ Dungeon::Dungeon()
    init_hardness();
    place_pc();
    place_stairs();
+   win_status = 0;
+   pc_dead_status = 0;
+   turn = 0;
+   pc_last_position = '.';
+   teleport_state = 0;
+   fog_state = 1;
 }
 
 void Dungeon::init_dungeon()
-{
-       int i, j;
-   
-       for(i = 0; i < DUNGEON_ROWS; i++)
+{   
+       for(int i = 0; i < DUNGEON_ROWS; i++)
        {
-           for(j = 0; j < DUNGEON_COLUMNS; j++)
+           for(int j = 0; j < DUNGEON_COLUMNS; j++)
            {
                dungeon[i][j] = ' ';
                dungeon[0][j] = '-';
                dungeon[DUNGEON_ROWS - 1][j] = '-';
+               pc_dungeon[i][j] = ' ';
+               pc_dungeon[0][j] = '-';
+               pc_dungeon[DUNGEON_ROWS - 1][j] = '-';
            }
    
            dungeon[i][0] = '|';
            dungeon[i][DUNGEON_COLUMNS - 1] = '|';
+           pc_dungeon[i][0] = '|';
+           pc_dungeon[i][DUNGEON_COLUMNS - 1] = '|';
        }
 }
 
@@ -367,4 +357,134 @@ void Dungeon::sort_rooms(void)
            rooms[i][2] = temp_start_row;
            rooms[i][3] = temp_start_cols;
        }
+}
+
+void Dungeon::print_game_status(void)
+{
+    if(win_status == 1)
+    {
+        std::cout << "YOU WON!!" << std::endl;
+        printf("YOU WON!!\n");
+    }
+    else if(win_status == 0)
+    {
+        std::cout <<"YOU WERE EATEN BY A MONSTER! TRY AGAIN!!" << std::endl;
+        printf("YOU WERE EATEN BY A MONSTER! TRY AGAIN!!\n");
+    }
+    else 
+    {
+        std::cout << "Exiting the game" << std::endl;
+        printf("Exiting the game\n");
+    }
+}
+
+void Dungeon::move_pc(int dir)
+{
+    if(dir == UPPER_LEFT)
+    {
+        if(dungeon[pc_x_position-1][pc_y_position-1] != ' ' && dungeon[pc_x_position-1][pc_y_position-1] != '|' && dungeon[pc_x_position-1][pc_y_position-1] != '-')
+        {
+
+            dungeon[pc_x_position][pc_y_position] = pc_last_position;
+            pc_last_position = dungeon[pc_x_position - 1][pc_y_position - 1];
+            dungeon[pc_x_position - 1][pc_y_position - 1] = '@';
+            pc_x_position = pc_x_position - 1;
+            pc_y_position = pc_y_position - 1;
+        }
+        
+
+    }else if(dir == UPPER_RIGHT)
+    {
+        if(dungeon[pc_x_position-1][pc_y_position+1] != ' ' && dungeon[pc_x_position-1][pc_y_position+1] != '|' && dungeon[pc_x_position-1][pc_y_position+1] != '-'){
+            
+         dungeon[pc_x_position][pc_y_position] = pc_last_position;
+         pc_last_position = dungeon[pc_x_position - 1][pc_y_position + 1];
+         dungeon[pc_x_position - 1][pc_y_position + 1] = '@';
+         pc_x_position = pc_x_position - 1;
+         pc_y_position = pc_y_position + 1;
+        }
+        
+    }
+    else if(dir == UP)
+    {
+        if(dungeon[pc_x_position-1][pc_y_position] != ' ' && dungeon[pc_x_position-1][pc_y_position] != '|' && dungeon[pc_x_position-1][pc_y_position] != '-')
+        {
+            
+         dungeon[pc_x_position][pc_y_position] = pc_last_position;
+         pc_last_position = dungeon[pc_x_position - 1][pc_y_position];
+         dungeon[pc_x_position - 1][pc_y_position] = '@';
+         pc_x_position = pc_x_position - 1;
+        }        
+    }
+    else if(dir == LOWER_LEFT)
+    {
+        if(dungeon[pc_x_position+1][pc_y_position-1] != ' ' && dungeon[pc_x_position+1][pc_y_position-1] != '|' && dungeon[pc_x_position+1][pc_y_position-1] != '-')
+        {
+            
+         dungeon[pc_x_position][pc_y_position] = pc_last_position;
+         pc_last_position = dungeon[pc_x_position+1][pc_y_position-1];
+         dungeon[pc_x_position + 1][pc_y_position - 1] = '@';
+         pc_x_position = pc_x_position + 1;
+         pc_y_position = pc_y_position - 1;
+        }        
+    }
+    else if(dir == LOWER_RIGHT)
+    {
+        if(dungeon[pc_x_position+1][pc_y_position+1] != ' ' && dungeon[pc_x_position+1][pc_y_position+1] != '|' && dungeon[pc_x_position+1][pc_y_position+1] != '-')
+        {
+            
+         dungeon[pc_x_position][pc_y_position] = pc_last_position;
+         pc_last_position = dungeon[pc_x_position + 1][pc_y_position + 1];
+         dungeon[pc_x_position + 1][pc_y_position + 1] = '@';
+         pc_x_position = pc_x_position + 1;
+         pc_y_position = pc_y_position + 1;
+        }        
+    }
+    else if(dir == DOWN)
+    {
+        if(dungeon[pc_x_position+1][pc_y_position] != ' ' && dungeon[pc_x_position+1][pc_y_position] != '|' && dungeon[pc_x_position+1][pc_y_position] != '-')
+        {
+            
+         dungeon[pc_x_position][pc_y_position] = pc_last_position;
+         pc_last_position = dungeon[pc_x_position + 1][pc_y_position];
+         dungeon[pc_x_position + 1][pc_y_position] = '@';
+         pc_x_position = pc_x_position + 1;
+        }        
+    }
+    else if(dir == LEFT)
+    {
+        if(dungeon[pc_x_position][pc_y_position-1] != ' ' && dungeon[pc_x_position][pc_y_position-1] != '|' && dungeon[pc_x_position][pc_y_position-1] != '-')
+        {
+            
+         dungeon[pc_x_position][pc_y_position] = pc_last_position;
+         pc_last_position = dungeon[pc_x_position][pc_y_position - 1];
+         dungeon[pc_x_position][pc_y_position - 1] = '@';
+         pc_y_position = pc_y_position - 1;
+        }        
+    }
+    else if(dir == RIGHT)
+    {
+        if(dungeon[pc_x_position][pc_y_position+1] != ' ' && dungeon[pc_x_position][pc_y_position+1] != '|' && dungeon[pc_x_position][pc_y_position+1] != '-')
+        {
+            
+         dungeon[pc_x_position][pc_y_position] = pc_last_position;
+         pc_last_position = dungeon[pc_x_position][pc_y_position + 1];
+         dungeon[pc_x_position][pc_y_position + 1] = '@';
+         pc_y_position = pc_y_position + 1;
+        }        
+    }
+}
+
+void Dungeon::update_pc_dungeon(void)
+{
+    for(int i = pc_x_position - 1; i < pc_x_position + 2; i++)
+    {
+        for(int j = pc_y_position - 1; j < pc_y_position + 2; j++)
+        {
+            if(pc_dungeon[i][j] != dungeon[i][j])
+            {
+                pc_dungeon[i][j] = dungeon[i][j];
+            }
+        }
+    }
 }
