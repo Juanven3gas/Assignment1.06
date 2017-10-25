@@ -20,6 +20,7 @@ public:
    void print_game_status(void);
    void move_pc(int dir);
    void update_pc_dungeon(void);
+   void remake_dungeon(void);
    char pc_dungeon[DUNGEON_ROWS][DUNGEON_COLUMNS];
    char dungeon[DUNGEON_ROWS][DUNGEON_COLUMNS];
    char rooms[NUM_ROOMS][ROOM_CHARS];

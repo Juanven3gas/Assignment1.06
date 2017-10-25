@@ -134,6 +134,24 @@ int main (int argc, char* argv[])
       {
          //Don't move the character but move the monsters
       }
+      else if(ch == '<')
+      {
+          if(main_dungeon.pc_last_position == '<')
+          {
+            wclear(dungeon_win);
+            //wclear(message_win);
+            main_dungeon.remake_dungeon();
+          }
+      }
+      else if (ch == '>')
+      {
+          if(main_dungeon.pc_last_position == '>')
+          {
+            wclear(dungeon_win);
+            //wclear(message_win);
+            main_dungeon.remake_dungeon();   
+          }
+      }
       else if(ch == 't')
       {
 

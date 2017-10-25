@@ -20,6 +20,22 @@ Dungeon::Dungeon()
    fog_state = 1;
 }
 
+void Dungeon::remake_dungeon(void)
+{
+    init_dungeon();
+    add_rooms();
+    add_corridors();
+    init_hardness();
+    place_pc();
+    place_stairs();
+    win_status = 0;
+    pc_dead_status = 0;
+    turn = 0;
+    pc_last_position = '.';
+    teleport_state = 0;
+    fog_state = 1;
+}
+
 void Dungeon::init_dungeon()
 {   
        for(int i = 0; i < DUNGEON_ROWS; i++)
