@@ -6,6 +6,7 @@
 
 Dungeon::Dungeon()
 {
+    pc_character = '@';
    init_dungeon();
    add_rooms();
    add_corridors();
@@ -20,6 +21,22 @@ Dungeon::Dungeon()
    fog_state = 1;
 }
 
+void Dungeon::place_pc_randomly(void)
+{
+    srand(time(NULL));
+
+    dungeon[pc_x_position][pc_y_position] = pc_last_position;
+    pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+
+    pc_x_position = (rand() % (DUNGEON_ROWS - 2)) + 1;
+    pc_y_position = (rand() % (DUNGEON_COLUMNS - 2)) + 1;
+
+    pc_last_position = dungeon[pc_x_position][pc_y_position];
+
+    dungeon[pc_x_position][pc_y_position] = '@';
+    pc_dungeon[pc_x_position][pc_y_position] = '@';
+}
+
 void Dungeon::remake_dungeon(void)
 {
     init_dungeon();
@@ -28,12 +45,14 @@ void Dungeon::remake_dungeon(void)
     init_hardness();
     place_pc();
     place_stairs();
+    pc_character = '@';
     win_status = 0;
     pc_dead_status = 0;
     turn = 0;
     pc_last_position = '.';
     teleport_state = 0;
     fog_state = 1;
+
 }
 
 void Dungeon::init_dungeon()
@@ -237,7 +256,7 @@ void Dungeon::place_pc()
        pc_x_position = pc_start_row;
        pc_y_position = pc_start_col;
        
-       dungeon[pc_start_row][pc_start_col] = '@';
+       dungeon[pc_start_row][pc_start_col] = pc_character;
 }
 
 void Dungeon::place_stairs()
@@ -398,96 +417,217 @@ void Dungeon::move_pc(int dir)
 {
     if(dir == UPPER_LEFT)
     {
-        if(dungeon[pc_x_position-1][pc_y_position-1] != ' ' && dungeon[pc_x_position-1][pc_y_position-1] != '|' && dungeon[pc_x_position-1][pc_y_position-1] != '-')
+        if(teleport_state)
         {
-
-            dungeon[pc_x_position][pc_y_position] = pc_last_position;
-            pc_last_position = dungeon[pc_x_position - 1][pc_y_position - 1];
-            dungeon[pc_x_position - 1][pc_y_position - 1] = '@';
-            pc_x_position = pc_x_position - 1;
-            pc_y_position = pc_y_position - 1;
+            if(dungeon[pc_x_position-1][pc_y_position-1] != '|' && dungeon[pc_x_position-1][pc_y_position-1] != '-')
+            {
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                //pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position - 1][pc_y_position - 1];
+                dungeon[pc_x_position - 1][pc_y_position - 1] = pc_character;
+                pc_x_position = pc_x_position - 1;
+                pc_y_position = pc_y_position - 1;
+            }
         }
-        
-
-    }else if(dir == UPPER_RIGHT)
+        else{
+            if(dungeon[pc_x_position-1][pc_y_position-1] != ' ' && dungeon[pc_x_position-1][pc_y_position-1] != '|' && dungeon[pc_x_position-1][pc_y_position-1] != '-' && !teleport_state)
+            {
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position - 1][pc_y_position - 1];
+                dungeon[pc_x_position - 1][pc_y_position - 1] = pc_character;
+                pc_x_position = pc_x_position - 1;
+                pc_y_position = pc_y_position - 1;
+            }
+        }
+    }
+    else if(dir == UPPER_RIGHT)
     {
-        if(dungeon[pc_x_position-1][pc_y_position+1] != ' ' && dungeon[pc_x_position-1][pc_y_position+1] != '|' && dungeon[pc_x_position-1][pc_y_position+1] != '-'){
-            
-         dungeon[pc_x_position][pc_y_position] = pc_last_position;
-         pc_last_position = dungeon[pc_x_position - 1][pc_y_position + 1];
-         dungeon[pc_x_position - 1][pc_y_position + 1] = '@';
-         pc_x_position = pc_x_position - 1;
-         pc_y_position = pc_y_position + 1;
+
+        if(teleport_state)
+        {
+            if(dungeon[pc_x_position-1][pc_y_position+1] != '|' && dungeon[pc_x_position-1][pc_y_position+1] != '-')
+            {
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                //pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position - 1][pc_y_position + 1];
+                dungeon[pc_x_position - 1][pc_y_position + 1] = pc_character;
+                pc_x_position = pc_x_position - 1;
+                pc_y_position = pc_y_position + 1;
+            }
+        }
+        else{
+         
+            if(dungeon[pc_x_position-1][pc_y_position+1] != ' ' && dungeon[pc_x_position-1][pc_y_position+1] != '|' && dungeon[pc_x_position-1][pc_y_position+1] != '-' && !teleport_state)
+            {    
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position - 1][pc_y_position + 1];
+                dungeon[pc_x_position - 1][pc_y_position + 1] = pc_character;
+                pc_x_position = pc_x_position - 1;
+                pc_y_position = pc_y_position + 1;
+            }   
         }
         
     }
     else if(dir == UP)
     {
-        if(dungeon[pc_x_position-1][pc_y_position] != ' ' && dungeon[pc_x_position-1][pc_y_position] != '|' && dungeon[pc_x_position-1][pc_y_position] != '-')
+
+        if(teleport_state)
         {
-            
-         dungeon[pc_x_position][pc_y_position] = pc_last_position;
-         pc_last_position = dungeon[pc_x_position - 1][pc_y_position];
-         dungeon[pc_x_position - 1][pc_y_position] = '@';
-         pc_x_position = pc_x_position - 1;
-        }        
+            if(dungeon[pc_x_position-1][pc_y_position] != '|' && dungeon[pc_x_position-1][pc_y_position] != '-')
+            {
+
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                //pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position - 1][pc_y_position];
+                dungeon[pc_x_position - 1][pc_y_position] = pc_character;
+                pc_x_position = pc_x_position - 1;
+            }
+        }
+        else
+        {       
+            if(dungeon[pc_x_position-1][pc_y_position] != ' ' && dungeon[pc_x_position-1][pc_y_position] != '|' && dungeon[pc_x_position-1][pc_y_position] != '-' && !teleport_state)
+            {
+                    
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position - 1][pc_y_position];
+                dungeon[pc_x_position - 1][pc_y_position] = pc_character;
+                pc_x_position = pc_x_position - 1;
+            }   
+        }    
     }
     else if(dir == LOWER_LEFT)
     {
-        if(dungeon[pc_x_position+1][pc_y_position-1] != ' ' && dungeon[pc_x_position+1][pc_y_position-1] != '|' && dungeon[pc_x_position+1][pc_y_position-1] != '-')
+
+        if(teleport_state)
         {
-            
-         dungeon[pc_x_position][pc_y_position] = pc_last_position;
-         pc_last_position = dungeon[pc_x_position+1][pc_y_position-1];
-         dungeon[pc_x_position + 1][pc_y_position - 1] = '@';
-         pc_x_position = pc_x_position + 1;
-         pc_y_position = pc_y_position - 1;
-        }        
+            if(dungeon[pc_x_position+1][pc_y_position-1] != '|' && dungeon[pc_x_position+1][pc_y_position-1] != '-')
+            {
+                        
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                //pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position+1][pc_y_position-1];
+                dungeon[pc_x_position + 1][pc_y_position - 1] = pc_character;
+                pc_x_position = pc_x_position + 1;
+                pc_y_position = pc_y_position - 1;
+            }
+        }
+        else
+        {
+            if(dungeon[pc_x_position+1][pc_y_position-1] != ' ' && dungeon[pc_x_position+1][pc_y_position-1] != '|' && dungeon[pc_x_position+1][pc_y_position-1] != '-'&& !teleport_state)
+            {
+                    
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position+1][pc_y_position-1];
+                dungeon[pc_x_position + 1][pc_y_position - 1] = pc_character;
+                pc_x_position = pc_x_position + 1;
+                pc_y_position = pc_y_position - 1;
+            }
+        }
     }
     else if(dir == LOWER_RIGHT)
     {
-        if(dungeon[pc_x_position+1][pc_y_position+1] != ' ' && dungeon[pc_x_position+1][pc_y_position+1] != '|' && dungeon[pc_x_position+1][pc_y_position+1] != '-')
+
+        if(teleport_state)
         {
             
-         dungeon[pc_x_position][pc_y_position] = pc_last_position;
-         pc_last_position = dungeon[pc_x_position + 1][pc_y_position + 1];
-         dungeon[pc_x_position + 1][pc_y_position + 1] = '@';
-         pc_x_position = pc_x_position + 1;
-         pc_y_position = pc_y_position + 1;
-        }        
+            if(dungeon[pc_x_position+1][pc_y_position+1] != '|' && dungeon[pc_x_position+1][pc_y_position+1] != '-')
+            {
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                //pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position + 1][pc_y_position + 1];
+                dungeon[pc_x_position + 1][pc_y_position + 1] = pc_character;
+                pc_x_position = pc_x_position + 1;
+                pc_y_position = pc_y_position + 1;
+            }
+        }
+        else{
+            if(dungeon[pc_x_position+1][pc_y_position+1] != ' ' && dungeon[pc_x_position+1][pc_y_position+1] != '|' && dungeon[pc_x_position+1][pc_y_position+1] != '-' && !teleport_state)
+            {
+                    
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position + 1][pc_y_position + 1];
+                dungeon[pc_x_position + 1][pc_y_position + 1] = pc_character;
+                pc_x_position = pc_x_position + 1;
+                pc_y_position = pc_y_position + 1;
+            }   
+        }    
     }
     else if(dir == DOWN)
     {
-        if(dungeon[pc_x_position+1][pc_y_position] != ' ' && dungeon[pc_x_position+1][pc_y_position] != '|' && dungeon[pc_x_position+1][pc_y_position] != '-')
+
+        if(teleport_state)
         {
-            
-         dungeon[pc_x_position][pc_y_position] = pc_last_position;
-         pc_last_position = dungeon[pc_x_position + 1][pc_y_position];
-         dungeon[pc_x_position + 1][pc_y_position] = '@';
-         pc_x_position = pc_x_position + 1;
-        }        
+            if(dungeon[pc_x_position+1][pc_y_position] != '|' && dungeon[pc_x_position+1][pc_y_position] != '-')
+            {    
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                //pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position + 1][pc_y_position];
+                dungeon[pc_x_position + 1][pc_y_position] = pc_character;
+                pc_x_position = pc_x_position + 1;
+            }
+        }
+        else
+        {
+            if(dungeon[pc_x_position+1][pc_y_position] != ' ' && dungeon[pc_x_position+1][pc_y_position] != '|' && dungeon[pc_x_position+1][pc_y_position] != '-'&& !teleport_state)
+            {
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position + 1][pc_y_position];
+                dungeon[pc_x_position + 1][pc_y_position] = pc_character;
+                pc_x_position = pc_x_position + 1;
+            }   
+        }
     }
     else if(dir == LEFT)
     {
-        if(dungeon[pc_x_position][pc_y_position-1] != ' ' && dungeon[pc_x_position][pc_y_position-1] != '|' && dungeon[pc_x_position][pc_y_position-1] != '-')
+        if(teleport_state)
         {
-            
-         dungeon[pc_x_position][pc_y_position] = pc_last_position;
-         pc_last_position = dungeon[pc_x_position][pc_y_position - 1];
-         dungeon[pc_x_position][pc_y_position - 1] = '@';
-         pc_y_position = pc_y_position - 1;
-        }        
+
+            if(dungeon[pc_x_position][pc_y_position-1] != '|' && dungeon[pc_x_position][pc_y_position-1] != '-')
+            {
+                        
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                //pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position][pc_y_position - 1];
+                dungeon[pc_x_position][pc_y_position - 1] = pc_character;
+                pc_y_position = pc_y_position - 1;
+            }
+        }
+        else
+        {
+            if(dungeon[pc_x_position][pc_y_position-1] != ' ' && dungeon[pc_x_position][pc_y_position-1] != '|' && dungeon[pc_x_position][pc_y_position-1] != '-'&& !teleport_state)
+            {
+                    
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position][pc_y_position - 1];
+                dungeon[pc_x_position][pc_y_position - 1] = pc_character;
+                pc_y_position = pc_y_position - 1;
+            }
+        }    
     }
     else if(dir == RIGHT)
     {
-        if(dungeon[pc_x_position][pc_y_position+1] != ' ' && dungeon[pc_x_position][pc_y_position+1] != '|' && dungeon[pc_x_position][pc_y_position+1] != '-')
+
+        if(teleport_state)
         {
-            
-         dungeon[pc_x_position][pc_y_position] = pc_last_position;
-         pc_last_position = dungeon[pc_x_position][pc_y_position + 1];
-         dungeon[pc_x_position][pc_y_position + 1] = '@';
-         pc_y_position = pc_y_position + 1;
-        }        
+
+            if(dungeon[pc_x_position][pc_y_position+1] != '|' && dungeon[pc_x_position][pc_y_position+1] != '-')
+            {           
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                //pc_dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position][pc_y_position + 1];
+                dungeon[pc_x_position][pc_y_position + 1] = pc_character;
+                pc_y_position = pc_y_position + 1;
+            }
+        }
+        else{
+            if(dungeon[pc_x_position][pc_y_position+1] != ' ' && dungeon[pc_x_position][pc_y_position+1] != '|' && dungeon[pc_x_position][pc_y_position+1] != '-'&& !teleport_state)
+            {
+                dungeon[pc_x_position][pc_y_position] = pc_last_position;
+                pc_last_position = dungeon[pc_x_position][pc_y_position + 1];
+                dungeon[pc_x_position][pc_y_position + 1] = pc_character;
+                pc_y_position = pc_y_position + 1;
+            }
+        }    
     }
 }
 

@@ -1,24 +1,16 @@
 #include <stdlib.h>
+#include <string.h>
+#include "Monster.h"
 
-class Monster
+Monster::Monster()
 {
-public:
-   Monster(char symbol, int speed, int room, int move, int attributes)
-   char symbol;
-   int x_position;
-   int y_position;
-   int alive;
-   int room;
-   int speed;
-   int attrib;
-   int move;
-};
-
-Monster::Monster(char symbol, int speed, int room, int move, int attributes)
-{
-   this.symbol = symbol;
-   this.speed = speed;
-   this.room = room;
-   this.move = move;
-   this.attrib = attributes;
+    symbol = '0';
+    x_position = 0;
+    y_position = 0;
+    alive = 1;
+    room = 0;
+    speed = 0;
+    attrib = 0;
+    move = 0;
 }
+

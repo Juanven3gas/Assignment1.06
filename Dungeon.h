@@ -17,14 +17,19 @@
 class Dungeon{
 public:
    Dungeon(void);
+   
    void print_game_status(void);
    void move_pc(int dir);
    void update_pc_dungeon(void);
    void remake_dungeon(void);
+   void place_pc_randomly(void);
+
    char pc_dungeon[DUNGEON_ROWS][DUNGEON_COLUMNS];
    char dungeon[DUNGEON_ROWS][DUNGEON_COLUMNS];
    char rooms[NUM_ROOMS][ROOM_CHARS];
    char pc_last_position;
+   char pc_character;
+
    int hardness[DUNGEON_ROWS][DUNGEON_COLUMNS];
    int pc_x_position;
    int pc_y_position;
@@ -33,6 +38,8 @@ public:
    int turn;
    int teleport_state;
    int fog_state;
+   int monster_arr_size;
+
 private:
    void init_dungeon(void);
    void add_rooms(void);
