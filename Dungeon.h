@@ -39,6 +39,7 @@ public:
    int teleport_state;
    int fog_state;
    int monster_arr_size;
+   int list_monster_state;
 
 private:
    void init_dungeon(void);
